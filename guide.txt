@@ -1,0 +1,15 @@
+1) User experience: For good performance the app should be progressive. (e.g): In facebook, first layout will be loaded, then content will be loaded.
+2) Content accessibility: Offline files using service worker.
+3) Applike experience: Installable app (using add to homescreen) using manifest.
+
+
+References:
+https://developers.google.com/web/fundamentals/codelabs/your-first-pwapp/
+https://developers.google.com/web/ilt/pwa/introduction-to-service-worker
+https://medium.com/@firt/progressive-web-apps-on-ios-are-here-d00430dee3a7
+https://blog.goodbarber.com/Service-Workers_a873.html
+Points:
+'Service worker' is available on SAFARI only for HTTPS/localhost/127.0.0.1 pages 
+1) https://www.chromium.org/Home/chromium-security/prefer-secure-origins-for-powerful-new-features
+2) https://github.com/vuejs/vue-hackernews-2.0/issues/268
+https://ngrok.com/   (create a public HTTPS URL for localhost)

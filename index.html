@@ -1,0 +1,138 @@
+
+<html>  
+<head>
+<meta charset="utf-8">
+<link rel="manifest" href="/manifest.json">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Shall We">
+  <link rel="apple-touch-icon" href="/images/icons/icon-512x512.png">
+</head>
+<style>
+    div#listHolder a {
+        font-size: 60px;
+    }
+    div#lyricsHolder {
+        font-size: 35px;
+    }
+    div#searchContainer{
+        padding: 25px;
+        width: 100%;
+        box-sizing: border-box;
+    }
+    div#searchContainer>input{
+      padding: 15px;
+      border: none;
+      width: 100%;
+        background: white;
+        margin: auto;
+        font-size: 45px;
+        box-shadow: 0 0 10px silver;
+        border: 1px solid silver;
+    }
+</style>
+<body>
+    <div>
+        <div style='font-size: 60px; cursor: pointer; color:white;padding: 25px;background:#3898F3;display: none;border-radius: 10px;position: absolute;' id="backArrowContainer">
+            <a id="backArrow" style="display: none;">Back</a>
+        </div>
+        <div style='font-size:150px;text-align: center;padding-bottom:30px'>Lyrics Album</div>
+    </div>
+    <div id="searchContainer">
+        <input type="text" placeholder="Search">
+    </div>
+    <div id="listHolder" style="border:1px solid rgba(0,0,0,0.1);padding:25px; cursor: pointer;box-sizing: border-box;margin: 0 25px"></div>
+    <div id="lyricsHolder" style="border:1px solid rgba(0,0,0,0.1);padding:25px; display: none;box-sizing: border-box;margin: 0 25px">
+         <pre></pre>
+    </div>
+<script src="src/d3-selection.v1.min.js"></script>
+<script src="src/utils.js"></script>
+<script src="src/list.js"></script>
+<script>
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker
+                 .register('./service-worker.js')
+                 .then(function() { console.log('Service Worker Registered'); });
+    }
+
+    list = list.sort(function(a, b){
+        return a[1].localeCompare(b[1]);
+    });
+
+    list.forEach(function(d) {
+        var xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function() {
+            if (this.readyState == 4 && this.status == 200) {
+               lyricsHolder.selectAll("pre").html(xhttp.responseText);
+            }
+        };
+        xhttp.open("GET", "/src/lyrics/" + d[1], true);
+        xhttp.send();
+    })
+
+    var listHolder = d3.selectAll("#listHolder"),
+        lyricsHolder = d3.selectAll("#lyricsHolder"),
+        backArrow = d3.selectAll("#backArrow"),
+        backArrowContainer = d3.selectAll("#backArrowContainer");
+    var li = utils.appendElement(listHolder, "li", list);
+    li.style("list-style-type", "none");
+    li.style("display", "block");
+    li.style("padding","25px 0");
+
+    var searchInputEle = d3.selectAll("input");
+    searchInputEle.on("change input", function(){
+        var searched = searchInputEle.node().value;
+        li.style("display", function(d) {
+            var i = d[1].toLowerCase().indexOf(searched.toLowerCase());
+            return ((i> -1) && (i === 0 || d[1][i-1] === " ")) ? null : "none";
+        })
+    });
+
+    var image = utils.appendElement(li, "div", [1]);
+    image.style("width", "70px");
+    image.style("height", "70px");
+    image.style("background-image", "url(images/default_movie.png)");
+    image.style("display", "inline-block")
+    image.style("background-size", "cover");
+    utils.appendElement(li, "a", [1]);
+    var anchor = li.select("a")
+    anchor.style("padding-left", "30px");
+    anchor.style("vertical-align", "top");
+    anchor.text(function(d) { 
+        var name = d[1].replace(/_/g, " ").replace(/.txt/g, "");
+        return name[0].toUpperCase() + name.substring(1).toLowerCase();
+        ;})
+    anchor.on("click", function(d) {
+        listHolder.style("display", "none");
+        lyricsHolder.style("display", null);
+        backArrow.style("display", null);
+        lyricsHolder.selectAll("pre").html(null);
+        searchInputEle.style("display", "none");
+        backArrowContainer.style("display", null);
+
+        let bb = backArrowContainer.node().getBoundingClientRect();
+        backArrowContainer.style("left", (window.innerWidth - bb.width- 50) + "px");
+        backArrowContainer.style("top", (window.innerHeight - bb.height - 50) + "px");
+
+
+        var xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function() {
+            if (this.readyState == 4 && this.status == 200) {
+               lyricsHolder.selectAll("pre").html(xhttp.responseText);
+            }
+        };
+        xhttp.open("GET", "/src/lyrics/" + d[1], true);
+        xhttp.send();
+    });
+
+    backArrow.on("click", function(d) {
+        listHolder.style("display", null);
+        lyricsHolder.style("display", "none");
+        backArrow.style("display", "none");
+        searchInputEle.style("display", "block");
+        backArrowContainer.style("display", "none");
+        searchInputEle.node().value = null;
+    })
+</script>
+</body>
+</html>
